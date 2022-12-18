@@ -1,7 +1,12 @@
 /**
- * Queue.h : Defines the queue, containing received data
+ * queue.h : Defines the queue, containing received data
  *
- * Author: Anton (ud) Golovkov, udattsk@gmail.com, 2022
+ * Author: Anton (ud) Golovkov, udattsk@gmail.com
+ *
+ * Distributed under the Boost Software License, Version 1.0. (See accompanying
+ * file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ *
+ * Official repository: https://github.com/ud84/mt
  */
 
 #pragma once
@@ -20,7 +25,7 @@ class queue
 {
 public:
     queue(const uint32_t threads_count_, uint32_t limit_ = 100, std::function<void(void)> overflow_callback_ = []() {})
-        : queue(),
+        : queue_(),
         mutex(),
         semaphore(),
         threads_count(threads_count_),

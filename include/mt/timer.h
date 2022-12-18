@@ -1,8 +1,12 @@
 /**
- * Timer.h : Defines the helper to create timer
+ * timer.h : Defines the helper to create timer
  *
  * Author: Anton (ud) Golovkov, udattsk@gmail.com
- * Copyright (C), Infinity Video Soft LLC, 2018
+ *
+ * Distributed under the Boost Software License, Version 1.0. (See accompanying
+ * file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ *
+ * Official repository: https://github.com/ud84/mt
  */
 
 #pragma once
@@ -19,19 +23,19 @@
 #include <exception>
 #include <cstdint>
 
-namespace MT
+namespace mt
 {
 
 #ifndef _WIN32
-class Timer
+class timer
 {
 public:
-	explicit Timer(std::function<void(void)> callback_)
+	explicit timer(std::function<void(void)> callback_)
 		: runned(false), thread(), callback(callback_), interval(1000)
 	{
 	}
 
-	~Timer()
+	~timer()
 	{
 		stop();
 	}
@@ -43,7 +47,7 @@ public:
 			interval = interval_;
 			runned = true;
 
-			thread = std::thread(&Timer::run, this);
+			thread = std::thread(&timer::run, this);
 		}
 	}
 
@@ -56,8 +60,8 @@ public:
 		}
 	}
 	
-	Timer(const Timer&) = delete;
-	Timer& operator=(const Timer&) = delete;
+	timer(const timer&) = delete;
+	timer& operator=(const timer&) = delete;
 
 private:
 	std::atomic<bool> runned;
@@ -80,15 +84,15 @@ private:
 	}
 };
 #else
-class Timer
+class timer
 {
 public:
-	explicit Timer(std::function<void(void)> callback_)
+	explicit timer(std::function<void(void)> callback_)
 		: callback(callback_), hTimer(NULL), hTimerQueue(NULL), runned(false)
 	{
 	}
 
-	~Timer()
+	~timer()
 	{
 		stop();
 	}
@@ -134,8 +138,8 @@ public:
 		runned = false;
 	}
 
-	Timer(const Timer&) = delete;
-	Timer& operator=(const Timer&) = delete;
+	timer(const timer&) = delete;
+	timer& operator=(const timer&) = delete;
 
 private:
 	std::function<void(void)> callback;
@@ -147,7 +151,7 @@ private:
 	
 	static VOID CALLBACK TimerRoutine(PVOID lpParam, BOOLEAN)
 	{
-		static_cast<Timer*>(lpParam)->callback();
+		static_cast<timer*>(lpParam)->callback();
 	}
 };
 #endif

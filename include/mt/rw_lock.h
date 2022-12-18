@@ -1,8 +1,12 @@
 /**
- * RWLock.h : Defines the RWLock primitive
+ * rw_lock.h : Defines the read/write lock primitive
  *
  * Author: Anton (ud) Golovkov, udattsk@gmail.com
- * Copyright (C), Infinity Video Soft LLC, 2018
+ *
+ * Distributed under the Boost Software License, Version 1.0. (See accompanying
+ * file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ *
+ * Official repository: https://github.com/ud84/mt
  */
 
 #pragma once
@@ -18,44 +22,44 @@
 #include <assert.h>
 #include <memory>
 
-namespace MT
+namespace mt
 {
 
 #ifndef _WIN32
-class RWLock
+class rw_lock
 {
 public:
-	RWLock()
-		: rwlock(PTHREAD_RWLOCK_INITIALIZER)
+	rw_lock()
+		: rw_lock(PTHREAD_RWLOCK_INITIALIZER)
 	{
-		pthread_rwlock_init(&rwlock, NULL);
+		pthread_rwlock_init(&rw_lock, NULL);
 	}
 
-	~RWLock()
+	~rw_lock()
 	{
-		pthread_rwlock_destroy(&rwlock);
+		pthread_rwlock_destroy(&rw_lock);
 	}
 	
-	void readLock()
+	void read_lock()
 	{
-		pthread_rwlock_rdlock(&rwlock);
+		pthread_rwlock_rdlock(&rw_lock);
 	}
-	void readUnLock()
+	void read_unlock()
 	{
-		pthread_rwlock_unlock(&rwlock);
+		pthread_rwlock_unlock(&rw_lock);
 	}
 
-	void writeLock()
+	void write_lock()
 	{
-		pthread_rwlock_wrlock(&rwlock);
+		pthread_rwlock_wrlock(&rw_lock);
 	}
-	void writeUnLock()
+	void write_unlock()
 	{
-		pthread_rwlock_unlock(&rwlock);
+		pthread_rwlock_unlock(&rw_lock);
 	}
 
 private:
-	pthread_rwlock_t rwlock;
+	pthread_rwlock_t rw_lock;
 };
 #else
 
@@ -78,10 +82,10 @@ typedef struct _RTL_RWLOCK
 typedef void(__stdcall *RtlManagePtr)(LPRTL_RWLOCK);
 typedef BYTE(__stdcall *RtlOperatePtr)(LPRTL_RWLOCK, BYTE);
 
-class RWLockXP // Implementation for Windows XP
+class rw_lock_xp // Implementation for Windows XP
 {
 public:
-	RWLockXP()
+	rw_lock_xp()
 		: hGetProcIDDLL(NULL),
 		RtlDeleteResource_func(NULL),
 		RtlReleaseResource_func(NULL),
@@ -124,7 +128,7 @@ public:
 		}
 	}
 	
-	~RWLockXP()
+	~rw_lock_xp()
 	{
 		if (RtlDeleteResource_func)
 		{
@@ -136,14 +140,14 @@ public:
 		}
 	}
 	
-	void readLock()
+	void read_lock()
 	{
 		if (RtlAcquireResourceShared_func)
 		{
 			RtlAcquireResourceShared_func(&rtlRWLock, TRUE);
 		}
 	}
-	void readUnLock()
+	void read_unlock()
 	{
 		if (RtlReleaseResource_func)
 		{
@@ -151,7 +155,7 @@ public:
 		}
 	}
 	
-	void writeLock()
+	void write_lock()
     {
 		if (RtlAcquireResourceExclusive_func)
 		{
@@ -159,7 +163,7 @@ public:
 		}
 	}
 	
-	void writeUnLock()
+	void write_unlock()
 	{
 		if (RtlReleaseResource_func)
 		{
@@ -179,10 +183,10 @@ private:
 
 typedef void(__stdcall *SRWLock_fptr)(PSRWLOCK);
 
-class RWLockSRW // For Windows Vista+ based on Slim RWLock
+class rw_lock_srw // For Windows Vista+ based on Slim rw_lock
 {
 public:
-	RWLockSRW()
+	rw_lock_srw()
 		: hGetProcIDDLL(NULL), 
 		AcquireSRWLockShared_func(NULL),
 		ReleaseSRWLockShared_func(NULL),
@@ -225,7 +229,7 @@ public:
 		}
 	}
 
-	~RWLockSRW()
+	~rw_lock_srw()
 	{
 		if (hGetProcIDDLL)
 		{
@@ -233,14 +237,14 @@ public:
 		}
 	}
 	
-	void readLock()
+	void read_lock()
 	{
 		if (AcquireSRWLockShared_func)
 		{
 			AcquireSRWLockShared_func(&srwLock);
 		}
 	}
-	void readUnLock()
+	void read_unlock()
 	{
 		if (ReleaseSRWLockShared_func)
 		{
@@ -248,14 +252,14 @@ public:
 		}
 	}
 
-	void writeLock()
+	void write_lock()
 	{
 		if (AcquireSRWLockExclusive_func)
 		{
 			AcquireSRWLockExclusive_func(&srwLock);
 		}
 	}
-	void writeUnLock()
+	void write_unlock()
 	{
 		if (ReleaseSRWLockExclusive_func)
 		{
@@ -274,99 +278,107 @@ private:
 	RTL_SRWLOCK srwLock;
 };
 
-class RWLock // Wrapper
+class rw_lock // Wrapper
 {
+    static bool is_windows_vista_or_greater()
+    {
+        DWORD version = GetVersion();
+        DWORD major = (DWORD)(LOBYTE(LOWORD(version)));
+        DWORD minor = (DWORD)(HIBYTE(LOWORD(version)));
+
+        return major >= 6;
+    }
 public:
-	RWLock()
-		: isVistaPlus(Common::IsWindowsVistaOrGreater()), rwLockXP(!isVistaPlus ? new RWLockXP() : nullptr), rwLockSRW(isVistaPlus ? new RWLockSRW() : nullptr) {}
+	rw_lock()
+		: is_vista_plus(is_windows_vista_or_greater()), rw_lock_xp_(!is_vista_plus ? new rw_lock_xp() : nullptr), rw_lock_srw_(is_vista_plus ? new rw_lock_srw() : nullptr) {}
 
-	void readLock()
+	void read_lock()
 	{
-		if (isVistaPlus)
+		if (is_vista_plus)
 		{
-			rwLockSRW->readLock();
+			rw_lock_srw_->read_lock();
 		}
 		else
 		{
-			rwLockXP->readLock();
+			rw_lock_xp_->read_lock();
 		}
 	}
-	void readUnLock()
+	void read_unlock()
 	{
-		if (isVistaPlus)
+		if (is_vista_plus)
 		{
-			rwLockSRW->readUnLock();
+			rw_lock_srw_->read_unlock();
 		}
 		else
 		{
-			rwLockXP->readUnLock();
+			rw_lock_xp_->read_unlock();
 		}
 	}
 
-	void writeLock()
+	void write_lock()
 	{
-		if (isVistaPlus)
+		if (is_vista_plus)
 		{
-			rwLockSRW->writeLock();
+			rw_lock_srw_->write_lock();
 		}
 		else
 		{
-			rwLockXP->writeLock();
+			rw_lock_xp_->write_lock();
 		}
 	}
-	void writeUnLock()
+	void write_unlock()
 	{
-		if (isVistaPlus)
+		if (is_vista_plus)
 		{
-			rwLockSRW->writeUnLock();
+			rw_lock_srw_->write_unlock();
 		}
 		else
 		{
-			rwLockXP->writeUnLock();
+			rw_lock_xp_->write_unlock();
 		}
 	}
 
 private:
-	bool isVistaPlus;
-	std::unique_ptr<RWLockXP> rwLockXP;
-	std::unique_ptr<RWLockSRW> rwLockSRW;
+	bool is_vista_plus;
+	std::unique_ptr<rw_lock_xp> rw_lock_xp_;
+	std::unique_ptr<rw_lock_srw> rw_lock_srw_;
 };
 #endif
 
-class ScopedRWLock
+class scoped_rw_lock
 {
 public:
-	ScopedRWLock(RWLock *lc_, bool write_ = false)
+	scoped_rw_lock(rw_lock *lc_, bool write_ = false)
 		: lc(*lc_), write(write_), locked(false)
 	{
 		if (write)
 		{
-			lc.writeLock();
+			lc.write_lock();
 		}
 		else
 		{
-			lc.readLock();
+			lc.read_lock();
 		}
 	}
 
-	~ScopedRWLock()
+	~scoped_rw_lock()
 	{
 		if (write)
 		{
-			lc.writeUnLock();
+			lc.write_unlock();
 		}
 		else
 		{
-			lc.readUnLock();
+			lc.read_unlock();
 		}
 	}
 
 	static void *operator new(size_t) = delete;
 	static void operator delete(void *) = delete;
-	ScopedRWLock(const ScopedRWLock&) = delete;
-	void operator=(const ScopedRWLock&) = delete;
+	scoped_rw_lock(const scoped_rw_lock&) = delete;
+	void operator=(const scoped_rw_lock&) = delete;
 private:
-	RWLock &lc;
+	rw_lock &lc;
 	bool write, locked;
 };
 

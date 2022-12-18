@@ -1,8 +1,12 @@
 /**
- * ThreadPriority.h : Defines the helper change thread priority
+ * thread_priority.h : Defines the helper change thread priority
  *
  * Author: Anton (ud) Golovkov, udattsk@gmail.com
- * Copyright (C), Infinity Video Soft LLC, 2018
+ *
+ * Distributed under the Boost Software License, Version 1.0. (See accompanying
+ * file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ *
+ * Official repository: https://github.com/ud84/mt
  */
 
 #pragma once
@@ -15,21 +19,21 @@
 #include <windows.h>
 #endif
 
-namespace MT
+namespace mt
 {
 
-enum PriorityType
+enum class priority_type
 {
-	ptLow,
-	ptNormal,
-	ptHigher,
-	ptRealTime
+	low,
+	normal,
+	higher,
+	real_time
 };
 
-static int set_thread_priority(std::thread &th, PriorityType tp)
+static int set_thread_priority(std::thread &th, priority_type tp)
 {
 #ifndef _WIN32
-	if (tp >= ptHigher)
+	if (tp >= priority_type::higher)
 	{
 		int policy = 0;
 		struct sched_param param = { 0 };
@@ -41,13 +45,13 @@ static int set_thread_priority(std::thread &th, PriorityType tp)
 	int pm = THREAD_PRIORITY_NORMAL;
 	switch (tp)
 	{
-		case ptLow:
+        case priority_type::low:
 			pm = THREAD_PRIORITY_LOWEST;
 		break;
-		case ptHigher:
+        case priority_type::higher:
 			pm = THREAD_PRIORITY_HIGHEST;
 		break;
-		case ptRealTime:
+        case priority_type::real_time:
 			pm = THREAD_PRIORITY_TIME_CRITICAL;
 		break;
 		default:

@@ -1,18 +1,22 @@
 /**
- * SpinLock.h : Defines the spin lock - very fast syncro primitive (based on busy wait)
+ * spin_lock.h : Defines the spin lock - very fast syncro primitive (based on busy wait)
  *
  * Author: Anton (ud) Golovkov, udattsk@gmail.com
- * Copyright (C), Infinity Video Soft LLC, 2018
+ *
+ * Distributed under the Boost Software License, Version 1.0. (See accompanying
+ * file LICENSE_1_0.txt or copy at http://www.boost.org/LICENSE_1_0.txt)
+ *
+ * Official repository: https://github.com/ud84/mt
  */
 
 #pragma once
 
 #include <atomic>
 
-namespace MT
+namespace mt
 {
 
-class SpinLock
+class spin_lock
 {
 public:
 	void lock()
