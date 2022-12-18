@@ -45,13 +45,13 @@ static int set_thread_priority(std::thread &th, priority_type tp)
 	int pm = THREAD_PRIORITY_NORMAL;
 	switch (tp)
 	{
-        case priority_type::low:
+		case priority_type::low:
 			pm = THREAD_PRIORITY_LOWEST;
 		break;
-        case priority_type::higher:
+		case priority_type::higher:
 			pm = THREAD_PRIORITY_HIGHEST;
 		break;
-        case priority_type::real_time:
+		case priority_type::real_time:
 			pm = THREAD_PRIORITY_TIME_CRITICAL;
 		break;
 		default:

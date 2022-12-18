@@ -28,7 +28,7 @@ public:
 	{
 		std::unique_lock<std::mutex> lock(mutex);
 		++count;
-        cond_var.notify_one();
+		cond_var.notify_one();
 	}
 
 	void wait()
@@ -36,12 +36,12 @@ public:
 		std::unique_lock<std::mutex> lock(mutex);
 		while (count == 0)
 		{
-            cond_var.wait(lock);
+			cond_var.wait(lock);
 		}
 		--count;
 	}
 
-	bool waitFor(uint32_t duration) // duration in milliseconds, return true if timeout is out
+	bool wait_for(uint32_t duration) // duration in milliseconds, return true if timeout is out
 	{
 		std::unique_lock<std::mutex> lock(mutex);
 		while (count == 0)
