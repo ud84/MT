@@ -30,36 +30,36 @@ class rw_lock
 {
 public:
 	rw_lock()
-		: rw_lock(PTHREAD_RWLOCK_INITIALIZER)
+		: rw_lock_(PTHREAD_RWLOCK_INITIALIZER)
 	{
-		pthread_rwlock_init(&rw_lock, NULL);
+		pthread_rwlock_init(&rw_lock_, NULL);
 	}
 
 	~rw_lock()
 	{
-		pthread_rwlock_destroy(&rw_lock);
+		pthread_rwlock_destroy(&rw_lock_);
 	}
 	
 	void read_lock()
 	{
-		pthread_rwlock_rdlock(&rw_lock);
+		pthread_rwlock_rdlock(&rw_lock_);
 	}
 	void read_unlock()
 	{
-		pthread_rwlock_unlock(&rw_lock);
+		pthread_rwlock_unlock(&rw_lock_);
 	}
 
 	void write_lock()
 	{
-		pthread_rwlock_wrlock(&rw_lock);
+		pthread_rwlock_wrlock(&rw_lock_);
 	}
 	void write_unlock()
 	{
-		pthread_rwlock_unlock(&rw_lock);
+		pthread_rwlock_unlock(&rw_lock_);
 	}
 
 private:
-	pthread_rwlock_t rw_lock;
+	pthread_rwlock_t rw_lock_;
 };
 #else
 
