@@ -282,11 +282,23 @@ class rw_lock // Wrapper
 {
     static bool is_windows_vista_or_greater()
     {
-        DWORD version = GetVersion();
-        DWORD major = (DWORD)(LOBYTE(LOWORD(version)));
-        DWORD minor = (DWORD)(HIBYTE(LOWORD(version)));
+        OSVERSIONINFOEX osvi = { 0 };
+        osvi.dwOSVersionInfoSize = sizeof(OSVERSIONINFOEX);
+        osvi.dwMajorVersion = 6;
 
-        return major >= 6;
+        DWORDLONG dwlConditionMask = 0;
+        int op = VER_GREATER_EQUAL;
+
+        VER_SET_CONDITION(dwlConditionMask, VER_MAJORVERSION, op);
+        VER_SET_CONDITION(dwlConditionMask, VER_MINORVERSION, op);
+        VER_SET_CONDITION(dwlConditionMask, VER_SERVICEPACKMAJOR, op);
+        VER_SET_CONDITION(dwlConditionMask, VER_SERVICEPACKMINOR, op);
+
+        return VerifyVersionInfo(
+            &osvi,
+            VER_MAJORVERSION | VER_MINORVERSION |
+            VER_SERVICEPACKMAJOR | VER_SERVICEPACKMINOR,
+            dwlConditionMask);
     }
 public:
 	rw_lock()
